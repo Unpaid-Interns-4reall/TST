@@ -1,7 +1,10 @@
 #include <stdio.h>
 
 int main() {
-    printf("Hello roda el nayim w rizk kmn\n");
-    printf("Hello roda el nayim w rizk kmn\n");
+    printf("Hello\n");
+    printf("kkk\n");
     return 0;
 }
+// Added a new function
+// edited from terminal
+// This is a test comment
