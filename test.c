@@ -2,7 +2,10 @@
 
 int main() {
     printf("Hello\n");
-	printf("kkk");
+<<<<<<< HEAD
+=======
+    printf("kkknm\n");
+>>>>>>> Karnib
     return 0;
 }
 // Added a new function
