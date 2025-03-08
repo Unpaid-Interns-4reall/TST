@@ -2,5 +2,6 @@
 
 int main() {
     printf("Hello roda el nayim w rizk kmn\n");
+    printf("Hello roda el nayim w rizk kmn\n");
     return 0;
 }
