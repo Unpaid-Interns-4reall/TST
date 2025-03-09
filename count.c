@@ -8,4 +8,4 @@ int countBoxes(char player, char boxes[ROWS][COLUMNS]) {
         }
     }
     return count;
-}// nahhal was here
+}
