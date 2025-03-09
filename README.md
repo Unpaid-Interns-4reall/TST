@@ -30,3 +30,46 @@ A simple two-player Dots and Boxes game implemented in C. This version uses a 4�
 3. Compile the code with:
    ```bash
    gcc -o dots_and_boxes main.c
+4. You should now have an executable called dots_and_boxes (on Windows, it might be dots_and_boxes.exe).
+
+## How to Run
+
+Run the compiled executable:
+```bash
+./dots_and_boxes
+```
+## How to Play
+
+1. When the program starts, it displays the board and each player's score.
+
+2. You’ll be prompted to enter four integers, for example:
+   0 0 0 1
+   These represent two adjacent dots:
+   - `0 0` = row 0, column 0  
+   - `0 1` = row 0, column 1  
+   (which are horizontally adjacent)
+
+3. Ensure the dots are **next to each other** either horizontally or vertically. If you pick an invalid pair (not adjacent, out of range, or already connected), you’ll be asked to try again.
+
+4. If your line completes a box, you’ll see:
+   Player A completed a square! And you immediately take another turn.
+
+5. Play continues until all 20 boxes are claimed.
+## Example Turn
+
+```vbnet
+Player A's turn. Enter the row and column of the first dot (e.g., 0 0) and second dot: 0 0 0 1
+This means Player A is drawing a horizontal line between dot(0,0) and dot(0,1).
+If that completes a box, Player A goes again; otherwise, it’s Player B’s turn.
+```
+## Contributing
+
+If you'd like to improve or extend this project:
+1. Fork this repository.
+2. Make your changes.
+3. Open a Pull Request describing your updates.
+
+## License
+
+This project is licensed under the MIT License.  
+Feel free to use, modify, and distribute it as you see fit.
