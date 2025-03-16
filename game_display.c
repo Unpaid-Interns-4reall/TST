@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 void printBoard(int ver[5][6], int hor[5][6], char boxes[4][5])
 {
     // Column headers
@@ -45,4 +48,27 @@ void printBoard(int ver[5][6], int hor[5][6], char boxes[4][5])
             printf("\n");
         }
     }
+}
+// Function to print the final result.
+void printFinalResult(char boxes[][5]) {
+    int finalScoreA = countBoxes('A', boxes);
+    int finalScoreB = countBoxes('B', boxes);
+
+    printf("Player A score: %d\n", finalScoreA);
+    printf("Player B score: %d\n", finalScoreB);
+
+    if (finalScoreA > finalScoreB) {
+        printf("Player A wins!\n");
+    } else if (finalScoreB > finalScoreA) {
+        printf("Player B wins!\n");
+    } else {
+        printf("It's a tie!\n");
+    }
+}
+// Function to display the current board and player scores.
+void displayStatus(int ver[][6], int hor[][6], char boxes[][5]) {
+    printBoard(ver, hor, boxes);
+    printf("Player A score: %d\n", countBoxes('A', boxes));
+    printf("Player B score: %d\n", countBoxes('B', boxes));
+    printf("****************\n");
 }

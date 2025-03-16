@@ -1,9 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ROWS 4
 #define COLUMNS 5
 
-// 1) checksquare function
+int countBoxes(char player, char boxes[ROWS][COLUMNS]) {
+    int count = 0;
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLUMNS; j++) {
+            if (boxes[i][j] == player) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+
 void checksquare(int row, int col, char player, 
                  int hor[5][6],
                  int ver[5][6],
@@ -64,5 +77,41 @@ void checksquare(int row, int col, char player,
     if (completed == 1)
     {
         printf("Player %c completed a square!\n", player);
+    }
+}
+
+// Returns a negative value if the move is invalid,
+// 0 if the move is valid but no box was completed,
+// or a positive number if a box (or boxes) were completed.
+int processMove(int r1, int c1, int r2, int c2, char currentPlayer, int hor[][6], int ver[][6], char boxes[][5]) {
+    if (r1 == r2 && (c1 == c2 + 1 || c1 + 1 == c2)) {
+        // Horizontal move.
+        int col = (c1 < c2) ? c1 : c2;
+        if (hor[r1][col] == 1) {
+            printf("That line is already taken. Try again.\n");
+            return -1;
+        }
+        hor[r1][col] = 1;
+        int oldScore = countBoxes(currentPlayer, boxes);
+        checksquare(r1, col, currentPlayer, hor, ver, boxes);
+        int newScore = countBoxes(currentPlayer, boxes);
+        return (newScore - oldScore);
+    }
+    else if (c1 == c2 && (r1 == r2 + 1 || r1 + 1 == r2)) {
+        // Vertical move.
+        int row = (r1 < r2) ? r1 : r2;
+        if (ver[row][c1] == 1) {
+            printf("That line is already taken. Try again.\n");
+            return -1;
+        }
+        ver[row][c1] = 1;
+        int oldScore = countBoxes(currentPlayer, boxes);
+        checksquare(row, c1, currentPlayer, hor, ver, boxes);
+        int newScore = countBoxes(currentPlayer, boxes);
+        return (newScore - oldScore);
+    }
+    else {
+        printf("Invalid move! Dots must be adjacent horizontally or vertically.\n");
+        return -1;
     }
 }
