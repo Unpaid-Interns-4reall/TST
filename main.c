@@ -1,135 +1,93 @@
 #include <stdio.h>
-#include "count.c"
-#include "print_board.c"
-#include "checksquare.c"
+#include <stdlib.h>
+#include <time.h>
+#include "game_logic.c"
+#include "game_display.c"
+#include "game_input.c"
+#include "game_bots.c"
 
 #define ROWS 4
 #define COLUMNS 5
 
-// 1) Main function: Two-player loop
-int main()
-{
-    // Arrays to track edges
-    int ver[5][6] = {0};
+int main(void) {
+    srand(time(NULL));
+
+    int gameMode = 0;
+    int botEnabled = 0;
+    int difficulty = 1; // 1=Easy, 2=Medium, 3=Hard
+
+    printf("Choose game mode:\n");
+    printf("1. Two Player Mode\n");
+    printf("2. Play Against Bot\n");
+    printf("Enter your choice: ");
+    if (scanf("%d", &gameMode) != 1) {
+        printf("Invalid input. Exiting.\n");
+        return 1;
+    }
+
+    if (gameMode == 2) {
+        botEnabled = 1;
+        printf("Choose bot difficulty:\n");
+        printf("1. Easy\n");
+        printf("2. Medium\n");
+        printf("3. Hard\n");
+        printf("Enter your choice: ");
+        if (scanf("%d", &difficulty) != 1) {
+            printf("Invalid input. Defaulting to Easy.\n");
+            difficulty = 1;
+        }
+        if (difficulty != 1) {
+            printf("Medium and Hard difficulties will be added soon. Defaulting to Easy mode.\n");
+            difficulty = 1;
+        }
+    }
+
+    // Game arrays
     int hor[5][6] = {0};
-
-    // Boxes array to store which player (A/B) claimed each box
+    int ver[5][6] = {0};
     char boxes[4][5] = {0};
-
-    // Total boxes on the board is 4*5 = 20
     int totalBoxes = ROWS * COLUMNS;
     int completedBoxes = 0;
-
-    // Game starts with Player A
     char currentPlayer = 'A';
 
-    // Keep going until all boxes are claimed
-    while (completedBoxes < totalBoxes)
-    {
-        // 1) Print current board
-        printBoard(ver, hor, boxes);
+    // Variables for human moves
+    int r1, c1, r2, c2;
 
-        // 2) Print current scores
-        printf("Player A score: %d\n", countBoxes('A', boxes));
-        printf("Player B score: %d\n", countBoxes('B', boxes));
-        printf("****************\n");
+    while (completedBoxes < totalBoxes) {
+        displayStatus(ver, hor, boxes);
 
-        // 3) Prompt current player for input
-        printf("Player %c's turn. Enter the row and column of the first dot (e.g., 0 0) and second dot: ", currentPlayer);
-        int r1, c1, r2, c2;
-        if (scanf("%d %d %d %d", &r1, &c1, &r2, &c2) != 4) {
-            // Bad input (not 4 integers)
-            printf("Invalid input. Please try again.\n");
-            // Clear input buffer
-            while (getchar() != '\n');
-            continue;
-        }
-
-        // Validate that the dots are within the correct range
-        // Dots range: row in [0..4], col in [0..5]
-        if (r1 < 0 || r1 > 4 || r2 < 0 || r2 > 4 || 
-            c1 < 0 || c1 > 5 || c2 < 0 || c2 > 5)
-        {
-            printf("Invalid dot coordinates. Try again.\n");
-            continue;
-        }
-
-        // 4) Check if the move is horizontal or vertical
-        //    and if it’s exactly between adjacent dots
-        if (r1 == r2 && (c1 == c2 + 1 || c1 + 1 == c2)) 
-        {
-            // Horizontal move
-            int col = (c1 < c2) ? c1 : c2;
-            // Check if this edge is already taken
-            if (hor[r1][col] == 1) {
-                printf("That line is already taken. Try again.\n");
+        int diff = 0;  // how many boxes were completed on this turn
+        if (botEnabled && currentPlayer == 'B') {
+            // Bot's turn
+            diff = bot_move(hor, ver, boxes, currentPlayer);
+            if (diff < 0) {
+                // If you ever decide the bot_move can return -1 for invalid,
+                // handle that here. Right now, it won't.
                 continue;
             }
-
-            // Mark the edge
-            hor[r1][col] = 1;
-
-            // Check if a box was completed
-            int oldScore = countBoxes(currentPlayer, boxes);
-            checksquare(r1, col, currentPlayer, hor, ver, boxes);
-            int newScore = countBoxes(currentPlayer, boxes);
-
-            // If no new box, switch players
-            if (newScore == oldScore) {
-                currentPlayer = (currentPlayer == 'A') ? 'B' : 'A';
+        } else {
+            // Human player's turn
+            if (!getPlayerMove(&r1, &c1, &r2, &c2, currentPlayer)) {
+                continue;  // invalid input
             }
-        }
-        else if (c1 == c2 && (r1 == r2 + 1 || r1 + 1 == r2)) 
-        {
-            // Vertical move
-            int row = (r1 < r2) ? r1 : r2;
-            // Check if this edge is already taken
-            if (ver[row][c1] == 1) {
-                printf("That line is already taken. Try again.\n");
+            diff = processMove(r1, c1, r2, c2, currentPlayer, hor, ver, boxes);
+            if (diff < 0) {
+                // invalid move
                 continue;
             }
-
-            // Mark the edge
-            ver[row][c1] = 1;
-
-            // Check if a box was completed
-            int oldScore = countBoxes(currentPlayer, boxes);
-            checksquare(row, c1, currentPlayer, hor, ver, boxes);
-            int newScore = countBoxes(currentPlayer, boxes);
-
-            // If no new box, switch players
-            if (newScore == oldScore) {
-                currentPlayer = (currentPlayer == 'A') ? 'B' : 'A';
-            }
-        }
-        else
-        {
-            printf("Invalid move! Dots must be adjacent horizontally or vertically.\n");
-            continue;
         }
 
-        // 5) Update how many boxes are claimed so far
+        // Update completed boxes
         completedBoxes = countBoxes('A', boxes) + countBoxes('B', boxes);
+
+        // Only switch players if no box was completed
+        if (diff == 0) {
+            currentPlayer = (currentPlayer == 'A') ? 'B' : 'A';
+        }
     }
 
-    // Once all boxes are claimed, print final board
-    printBoard(ver, hor, boxes);
-
-    // Final scores
-    int finalScoreA = countBoxes('A', boxes);
-    int finalScoreB = countBoxes('B', boxes);
-
-    printf("Player A score: %d\n", finalScoreA);
-    printf("Player B score: %d\n", finalScoreB);
-
-    // Determine winner
-    if (finalScoreA > finalScoreB) {
-        printf("Player A wins!\n");
-    } else if (finalScoreB > finalScoreA) {
-        printf("Player B wins!\n");
-    } else {
-        printf("It's a tie!\n");
-    }
-
+    // Game is over
+    displayStatus(ver, hor, boxes);
+    printFinalResult(boxes);
     return 0;
 }
