@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "game_display.h"
+#include "game_logic.h"
 
 void printBoard(int ver[5][6], int hor[5][6], char boxes[4][5])
 {
@@ -37,7 +39,6 @@ void printBoard(int ver[5][6], int hor[5][6], char boxes[4][5])
                     printf(" ");
                 }
                 if (j < 5) {
-                    // print the box char or space
                     if (boxes[i][j] == 0) {
                         printf(" ");
                     } else {
@@ -49,7 +50,7 @@ void printBoard(int ver[5][6], int hor[5][6], char boxes[4][5])
         }
     }
 }
-// Function to print the final result.
+
 void printFinalResult(char boxes[][5]) {
     int finalScoreA = countBoxes('A', boxes);
     int finalScoreB = countBoxes('B', boxes);
@@ -65,7 +66,7 @@ void printFinalResult(char boxes[][5]) {
         printf("It's a tie!\n");
     }
 }
-// Function to display the current board and player scores.
+
 void displayStatus(int ver[][6], int hor[][6], char boxes[][5]) {
     printBoard(ver, hor, boxes);
     printf("Player A score: %d\n", countBoxes('A', boxes));

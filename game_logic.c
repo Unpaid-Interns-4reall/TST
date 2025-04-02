@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-#define ROWS 4
-#define COLUMNS 5
+#include "game_logic.h"
 
 int countBoxes(char player, char boxes[ROWS][COLUMNS]) {
     int count = 0;
@@ -15,7 +13,6 @@ int countBoxes(char player, char boxes[ROWS][COLUMNS]) {
     }
     return count;
 }
-
 
 void checksquare(int row, int col, char player, 
                  int hor[5][6],
@@ -33,26 +30,26 @@ void checksquare(int row, int col, char player,
             && hor[row+1][col] == 1 
             && ver[row][col] == 1 
             && ver[row][col+1] == 1)
-            {
-                boxes[row][col] = player;
-                completed = 1;
-            }
-            // Check box above
+        {
+            boxes[row][col] = player;
+            completed = 1;
+        }
+        // Check box above
         if (row > 0 
             && boxes[row-1][col] == 0  
             && hor[row-1][col] == 1
             && ver[row-1][col] == 1
             && ver[row-1][col+1] == 1)
-            {
-                boxes[row-1][col] = player;
-                completed = 1;
-            }
-        }
-        
-        // If this was a vertical edge
-        if (row >= 0 && row < 4 && col >= 0 && col < 6 && ver[row][col] == 1)
         {
-            // Check box to the right
+            boxes[row-1][col] = player;
+            completed = 1;
+        }
+    }
+        
+    // If this was a vertical edge
+    if (row >= 0 && row < 4 && col >= 0 && col < 6 && ver[row][col] == 1)
+    {
+        // Check box to the right
         if (col < 5
             && boxes[row][col] == 0  
             && ver[row][col+1] == 1
@@ -80,9 +77,6 @@ void checksquare(int row, int col, char player,
     }
 }
 
-// Returns a negative value if the move is invalid,
-// 0 if the move is valid but no box was completed,
-// or a positive number if a box (or boxes) were completed.
 int processMove(int r1, int c1, int r2, int c2, char currentPlayer, int hor[][6], int ver[][6], char boxes[][5]) {
     if (r1 == r2 && (c1 == c2 + 1 || c1 + 1 == c2)) {
         // Horizontal move.
