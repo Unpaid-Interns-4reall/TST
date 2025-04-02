@@ -31,9 +31,9 @@ int easy_bot(int hor[5][6], int ver[5][6], char boxes[4][5], char bot) {
     }
 
     if (isHorizontal) {
-        printf("Easy bot chose: Horizontal at (%d, %d)\n", row, col);
+        printf("Bot chose: Horizontal at (%d, %d)\n", row, col);
     } else {
-        printf("Easy bot chose: Vertical at (%d, %d)\n", row, col);
+        printf("Bot chose: Vertical at (%d, %d)\n", row, col);
     }
 
     return newScore - oldScore;
@@ -68,7 +68,7 @@ int medium_bot(int hor[5][6], int ver[5][6], char boxes[4][5], char bot) {
                 if (newScore - oldScore > 0) {
                     hor[i][j] = 1;
                     checksquare(i, j, bot, hor, ver, boxes);
-                    printf("Medium bot chose: Horizontal at (%d, %d)\n", i, j);
+                    printf("Bot chose: Horizontal at (%d, %d)\n", i, j);
                     return newScore - oldScore;
                 }
             }
@@ -97,7 +97,7 @@ int medium_bot(int hor[5][6], int ver[5][6], char boxes[4][5], char bot) {
                 if (newScore - oldScore > 0) {
                     ver[i][j] = 1;
                     checksquare(i, j, bot, hor, ver, boxes);
-                    printf("Medium bot chose: Vertical at (%d, %d)\n", i, j);
+                    printf("Bot chose: Vertical at (%d, %d)\n", i, j);
                     return newScore - oldScore;
                 }
             }
