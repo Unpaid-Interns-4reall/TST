@@ -1,3 +1,4 @@
+// main.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +7,7 @@
 
 #define ROWS      4
 #define COLS      5
-#define MAX_DEPTH 4
+#define MAX_DEPTH 5
 
 #define HUMAN 'A'
 #define AI    'B'
@@ -35,6 +36,9 @@ int  isGameOver(char boxes[ROWS][COLS]);
 
 // Prototypes: I/O
 int  getPlayerMove(int *r1, int *c1, int *r2, int *c2);
+void printBoard(int ver[ROWS][COLS+1],
+                int hor[ROWS+1][COLS],
+                char boxes[ROWS][COLS]);
 
 // Prototypes: Easy & Random bot
 Move getRandomMove(int hor[ROWS+1][COLS],
@@ -94,7 +98,7 @@ int checkSquare(int row, int col, char player,
                 int ver[ROWS][COLS+1],
                 char boxes[ROWS][COLS]) {
     int gained = 0;
-    // horizontal edge
+    // horizontal
     if (hor[row][col]) {
         if (row < ROWS &&
             boxes[row][col] == 0 &&
@@ -109,7 +113,7 @@ int checkSquare(int row, int col, char player,
             gained++;
         }
     }
-    // vertical edge
+    // vertical
     if (ver[row][col]) {
         if (col < COLS &&
             boxes[row][col] == 0 &&
@@ -223,7 +227,6 @@ int easy_bot(int hor[ROWS+1][COLS],
 // ─────────────────────────────────────────────────────────────────────────────
 // MEDIUM BOT: chain simulation + threads
 
-// Adjusted copy_state
 void copy_state(int srcHor[ROWS+1][COLS],
                 int srcVer[ROWS][COLS+1],
                 char srcBoxes[ROWS][COLS],
@@ -235,7 +238,6 @@ void copy_state(int srcHor[ROWS+1][COLS],
     memcpy(dstBoxes, srcBoxes, sizeof(char)*ROWS*COLS);
 }
 
-// Simulate chains of box captures
 int simulate_chain(int hor[ROWS+1][COLS],
                    int ver[ROWS][COLS+1],
                    char boxes[ROWS][COLS],
@@ -278,7 +280,6 @@ int simulate_chain(int hor[ROWS+1][COLS],
     return found ? maxChain : 0;
 }
 
-// Thread‐arg for medium_bot
 typedef struct {
     int row,col,isHorizontal;
     int hor[ROWS+1][COLS], ver[ROWS][COLS+1];
@@ -286,7 +287,6 @@ typedef struct {
     char bot;
 } ThreadArgs;
 
-// Worker
 void *worker_medium(void *arg) {
     ThreadArgs *a = arg;
     int h2[ROWS+1][COLS], v2[ROWS][COLS+1];
@@ -312,7 +312,6 @@ void *worker_medium(void *arg) {
     return NULL;
 }
 
-// Medium bot entry
 int medium_bot(int hor[ROWS+1][COLS],
                int ver[ROWS][COLS+1],
                char boxes[ROWS][COLS],
@@ -342,7 +341,6 @@ int medium_bot(int hor[ROWS+1][COLS],
         }
       }
     }
-
     // join
     for(int i=0;i<tc;i++) pthread_join(th[i],NULL);
 
@@ -364,7 +362,7 @@ int medium_bot(int hor[ROWS+1][COLS],
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hard bot: minimax + fallback
+// HARD BOT: minimax + fixed fallback
 int minimax(int hor[ROWS+1][COLS],
             int ver[ROWS][COLS+1],
             char boxes[ROWS][COLS],
@@ -374,27 +372,25 @@ int minimax(int hor[ROWS+1][COLS],
 
     if(player==AI){
       int maxEval=-100000;
-      // horizontal
       for(int r=0;r<=ROWS;r++)
        for(int c=0;c<COLS;c++)
         if(!hor[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
           int gain=applyMove(r,c,r,c+1,AI,h2,v2,b2);
-          char next = gain>0?AI:HUMAN;
+          char next=gain>0?AI:HUMAN;
           int eval=minimax(h2,v2,b2,depth-1,alpha,beta,next);
           if(eval>maxEval) maxEval=eval;
           if(maxEval>alpha) alpha=maxEval;
           if(beta<=alpha) return maxEval;
         }
-      // vertical
       for(int r=0;r<ROWS;r++)
        for(int c=0;c<=COLS;c++)
         if(!ver[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
           int gain=applyMove(r,c,r+1,c,AI,h2,v2,b2);
-          char next = gain>0?AI:HUMAN;
+          char next=gain>0?AI:HUMAN;
           int eval=minimax(h2,v2,b2,depth-1,alpha,beta,next);
           if(eval>maxEval) maxEval=eval;
           if(maxEval>alpha) alpha=maxEval;
@@ -403,27 +399,25 @@ int minimax(int hor[ROWS+1][COLS],
       return maxEval;
     } else {
       int minEval=100000;
-      // horizontal
       for(int r=0;r<=ROWS;r++)
        for(int c=0;c<COLS;c++)
         if(!hor[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
           int gain=applyMove(r,c,r,c+1,HUMAN,h2,v2,b2);
-          char next = gain>0?HUMAN:AI;
+          char next=gain>0?HUMAN:AI;
           int eval=minimax(h2,v2,b2,depth-1,alpha,beta,next);
           if(eval<minEval) minEval=eval;
           if(minEval<beta)  beta=minEval;
           if(beta<=alpha) return minEval;
         }
-      // vertical
       for(int r=0;r<ROWS;r++)
        for(int c=0;c<=COLS;c++)
         if(!ver[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
           int gain=applyMove(r,c,r+1,c,HUMAN,h2,v2,b2);
-          char next = gain>0?HUMAN:AI;
+          char next=gain>0?HUMAN:AI;
           int eval=minimax(h2,v2,b2,depth-1,alpha,beta,next);
           if(eval<minEval) minEval=eval;
           if(minEval<beta)  beta=minEval;
@@ -437,16 +431,15 @@ Move getBestMove(int hor[ROWS+1][COLS],
                  int ver[ROWS][COLS+1],
                  char boxes[ROWS][COLS]) {
     Move best = {0,0,1};
-    int bestVal = -100000;
+    int   bestVal = -100000;
     // horizontal
     for(int r=0;r<=ROWS;r++){
       for(int c=0;c<COLS;c++){
         if(!hor[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
-          int gain=applyMove(r,c,r,c+1,AI,h2,v2,b2);
-          char next=gain>0?AI:HUMAN;
-          int val=minimax(h2,v2,b2,MAX_DEPTH-1,-100000,100000,next);
+          applyMove(r,c,r,c+1,AI,h2,v2,b2);
+          int val=minimax(h2,v2,b2,MAX_DEPTH-1,-100000,100000,AI);
           if(val>bestVal){ bestVal=val; best=(Move){r,c,1}; }
         }
       }
@@ -457,14 +450,14 @@ Move getBestMove(int hor[ROWS+1][COLS],
         if(!ver[r][c]){
           int h2[ROWS+1][COLS],v2[ROWS][COLS+1]; char b2[ROWS][COLS];
           copy_state(hor,ver,boxes,h2,v2,b2);
-          int gain=applyMove(r,c,r+1,c,AI,h2,v2,b2);
-          char next=gain>0?AI:HUMAN;
-          int val=minimax(h2,v2,b2,MAX_DEPTH-1,-100000,100000,next);
+          applyMove(r,c,r+1,c,AI,h2,v2,b2);
+          int val=minimax(h2,v2,b2,MAX_DEPTH-1,-100000,100000,AI);
           if(val>bestVal){ bestVal=val; best=(Move){r,c,0}; }
         }
       }
     }
-    if(bestVal <= 0) return getRandomMove(hor,ver);
+    if(bestVal == -100000)  // only fallback if truly no minimax branch
+        return getRandomMove(hor,ver);
     return best;
 }
 
@@ -479,7 +472,6 @@ int main() {
     char player             = HUMAN;
     int mode;
 
-    // Choose mode
     printf("Select game mode:\n");
     printf("  1. Two-player\n");
     printf("  2. Easy Bot\n");
@@ -490,42 +482,21 @@ int main() {
         mode = 1;
     }
 
-    // Main loop
     while (!isGameOver(boxes)) {
         printBoard(ver, hor, boxes);
 
-        // Human turn (either pure two‑player, or Player A in bot modes)
         if (mode == 1 || (mode > 1 && player == HUMAN)) {
-            // Indicate whose turn
             printf("Player %c's turn.\n", player);
-
             int r1, c1, r2, c2;
-            if (!getPlayerMove(&r1, &c1, &r2, &c2))
-                continue;
-
-            int gain = applyMove(r1, c1, r2, c2,
-                                 player, hor, ver, boxes);
-            if (gain < 0) {
-                printf("Invalid move!\n");
-                continue;
-            }
-
-            // On a non-scoring move, switch player
+            if (!getPlayerMove(&r1,&c1,&r2,&c2)) continue;
+            int gain = applyMove(r1,c1,r2,c2,player,hor,ver,boxes);
+            if (gain < 0) { printf("Invalid move!\n"); continue; }
             if (gain == 0) {
-                if (mode == 1) {
-                    // Two‑player: A ↔ B
-                    player = (player == HUMAN ? 'B' : HUMAN);
-                } else {
-                    // Bot modes: go to AI
-                    player = AI;
-                }
+                if (mode == 1) player = (player==HUMAN?'B':HUMAN);
+                else           player = AI;
             }
-            // else: same player moves again
-        }
-        else {
-            // Bot turn (Player B)
+        } else {
             int gain;
-
             if (mode == 2) {
                 gain = easy_bot(hor, ver, boxes, AI);
             }
@@ -533,39 +504,27 @@ int main() {
                 gain = medium_bot(hor, ver, boxes, AI);
             }
             else {
-                // Hard: random first 10 moves, then minimax
                 int played = 0;
-                for (int i = 0; i <= ROWS; i++)
-                    for (int j = 0; j < COLS; j++)
-                        if (hor[i][j]) played++;
-                for (int i = 0; i < ROWS; i++)
-                    for (int j = 0; j <= COLS; j++)
-                        if (ver[i][j]) played++;
-
-                Move m = (played < 10
-                          ? getRandomMove(hor, ver)
-                          : getBestMove(hor, ver, boxes));
+                for (int i=0;i<=ROWS;i++) for(int j=0;j<COLS;j++) if(hor[i][j]) played++;
+                for (int i=0;i<ROWS;i++) for(int j=0;j<=COLS;j++) if(ver[i][j]) played++;
+                Move m = (played<10)
+                         ? getRandomMove(hor,ver)
+                         : getBestMove(hor,ver,boxes);
                 gain = applyMove(
-                    m.row,
-                    m.col,
-                    m.isHorizontal ? m.row : m.row + 1,
-                    m.isHorizontal ? m.col + 1 : m.col,
-                    AI, hor, ver, boxes
+                    m.row,m.col,
+                    m.isHorizontal?m.row:m.row+1,
+                    m.isHorizontal?m.col+1:m.col,
+                    AI,hor,ver,boxes
                 );
                 printf("Bot plays %s at (%d,%d)\n",
-                       m.isHorizontal ? "H" : "V",
-                       m.row, m.col);
+                       m.isHorizontal?"H":"V", m.row,m.col);
             }
-
-            // On non-scoring move, back to human
             if (gain == 0) {
                 player = HUMAN;
             }
-            // else: bot moves again
         }
     }
 
-    // Game over
     printBoard(ver, hor, boxes);
     int a = countBoxes(HUMAN, boxes);
     int b = countBoxes(AI, boxes);
