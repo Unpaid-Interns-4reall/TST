@@ -154,32 +154,43 @@ int getPlayerMove(int *r1, int *c1, int *r2, int *c2) {
 
 // Print board
 void printBoard(int ver[ROWS][COLS+1],
-                int hor[ROWS+1][COLS],
-                char boxes[ROWS][COLS]) {
-    printf("   ");
-    for (int j = 0; j <= COLS; j++) printf("%d ", j);
-    printf("\n");
-    for (int i = 0; i <= ROWS; i++) {
-        printf("%d  ", i);
-        for (int j = 0; j < COLS; j++) {
-            printf(".");
-            printf(hor[i][j] ? "-" : " ");
-        }
-        printf(".\n");
-        if (i < ROWS) {
-            printf("   ");
-            for (int j = 0; j <= COLS; j++) {
-                printf(ver[i][j] ? "|" : " ");
-                if (j < COLS) {
-                    char c = boxes[i][j];
-                    printf(c ? "%c" : " ", c);
-                }
-            }
-            printf("\n");
-        }
-    }
+  int hor[ROWS+1][COLS],
+  char boxes[ROWS][COLS])
+{
+// Column headers
+printf("   ");
+for (int j = 0; j <= COLS; j++) {
+printf("%d ", j);
 }
+printf("\n");
 
+for (int i = 0; i <= ROWS; i++) 
+{
+// Row header
+printf("%d  ", i);
+
+// Print dots + horizontal edges
+for (int j = 0; j < COLS; j++) {
+putchar('.');
+putchar(hor[i][j] ? '-' : ' ');
+}
+putchar('.');
+putchar('\n');
+
+// Print vertical edges + boxes (except after last dot‑row)
+if (i < ROWS) {
+printf("   "); 
+for (int j = 0; j <= COLS; j++) {
+  putchar(ver[i][j] ? '|' : ' ');
+  if (j < COLS) {
+      char o = boxes[i][j];
+      putchar(o ? o : ' ');
+  }
+}
+putchar('\n');
+}
+}
+}
 // ─────────────────────────────────────────────────────────────────────────────
 // EASY BOT: random valid move
 Move getRandomMove(int hor[ROWS+1][COLS],
@@ -368,7 +379,7 @@ int main() {
       mode = 1;
   }
 
-  // If Hard‑Bot mode, invoke the external program and quit
+  // If Hard‑Bot mode, hand off to external program and exit
   if (mode == 4) {
       system("./Hard_Bot");
       return 0;
@@ -378,9 +389,17 @@ int main() {
       printBoard(ver, hor, boxes);
 
       if (mode == 1 || (mode > 1 && player == HUMAN)) {
-          printf("Player %c's turn.\n", player);
+          // Combined prompt exactly as in your screenshot:
+          printf(
+            "Player %c's turn. Enter the row and column of the first dot "
+            "(e.g., A0 -> 0 0) and second dot: ",
+            player
+          );
           int r1, c1, r2, c2;
-          if (!getPlayerMove(&r1, &c1, &r2, &c2)) continue;
+          if (!getPlayerMove(&r1, &c1, &r2, &c2)) {
+              while (getchar() != '\n');
+              continue;
+          }
           int gain = applyMove(r1, c1, r2, c2,
                                player, hor, ver, boxes);
           if (gain < 0) {
@@ -388,8 +407,8 @@ int main() {
               continue;
           }
           if (gain == 0) {
-              if (mode == 1) player = (player == HUMAN ? AI : HUMAN);
-              else           player = AI;
+              if (mode == 1)      player = (player == HUMAN ? AI : HUMAN);
+              else                player = AI;
           }
       } else {
           int gain;
@@ -404,13 +423,15 @@ int main() {
       }
   }
 
+  // Game over: final board and results
   printBoard(ver, hor, boxes);
   int a = countBoxes(HUMAN, boxes);
   int b = countBoxes(AI,    boxes);
   printf("Final Score A=%d B=%d\n", a, b);
-  if (a > b)      printf("Player A wins!\n");
+  if      (a > b) printf("Player A wins!\n");
   else if (b > a) printf("Player B wins!\n");
   else            printf("It's a tie!\n");
 
   return 0;
 }
+

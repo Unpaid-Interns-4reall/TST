@@ -66,27 +66,31 @@
  static void makeanymove(void);
  
  /* ---------- main ---------- */
- int main(void)
- {
-     srand((unsigned)time(NULL));
-     initBoard();
- 
-     while (score[0] + score[1] < ROWS * COLS) {
-         drawBoard();
-         if (player == 0)
-             humanMove();
-         else
-             hardBotMove();
-     }
- 
-     drawBoard();
-     printf("Final score  A:%d  B:%d   ->  ", score[0], score[1]);
-     if (score[0] > score[1]) puts("A wins!");
-     else if (score[1] > score[0]) puts("B wins!");
-     else puts("It's a tie!");
-     return 0;
- }
- 
+ int main(void) {
+    srand((unsigned)time(NULL));
+    initBoard();
+
+    while (score[0] + score[1] < ROWS * COLS) {
+        drawBoard();
+        // exact prompt as in your screenshot:
+        printf(
+            "Player %c's turn. Enter the row and column of the first dot "
+            "(e.g., A0 -> 0 0) and second dot: ",
+            player ? 'B' : 'A'
+        );
+        if (player == 0)
+            humanMove();
+        else
+            hardBotMove();
+    }
+
+    drawBoard();
+    // after final drawBoard (which already shows stars & scores), show result:
+    if (score[0] > score[1])      puts("A wins!");
+    else if (score[1] > score[0]) puts("B wins!");
+    else                           puts("It's a tie!");
+    return 0;
+}
  /* ---------- initialisation ---------- */
  static void initBoard(void)
  {
@@ -99,40 +103,41 @@
  }
  
  /* ---------- fixed console drawing ---------- */
- static void drawBoard(void) {
-    // Column headers
-    printf("  ");
-    for (int c = 0; c < DOT_COLS; ++c) {
-        printf("%2d ", c);
-    }
-    putchar('\n');
-
-    for (int r = 0; r < DOT_ROWS; ++r) {
-        // Dot‐line with row label
-        printf("%2d ", r);
-        for (int c = 0; c < COLS; ++c) {
-            printf("·");
-            printf(hedge[r][c] ? "──" : "  ");
-        }
-        printf("·\n");
-
-        if (r == ROWS) break;
-
-        // Vertical‐line + box owners
-        printf("   ");
-        for (int c = 0; c < DOT_COLS; ++c) {
-            printf(vedge[r][c] ? "│" : " ");
-            if (c < COLS) {
-                char o = boxOwner[r][c];
-                printf("%c ", o ? o : ' ');
-            }
-        }
-        putchar('\n');
-    }
-
-    printf("\nScore  A:%d  B:%d   [%c’s turn]\n\n",
-           score[0], score[1], player ? 'B' : 'A');
-}
+ static void drawBoard(void)
+ {
+     // Column headers
+     printf("   ");
+     for (int j = 0; j <= COLS; j++) {
+         printf("%d ", j);
+     }
+     printf("\n");
+ 
+     // Grid rows
+     for (int i = 0; i <= ROWS; i++) {
+         // Row header + dots + horizontal edges
+         printf("%d  ", i);
+         for (int j = 0; j < COLS; j++) {
+             printf(".%c", hedge[i][j] ? '-' : ' ');
+         }
+         printf(".\n");
+ 
+         // Vertical edges + box owners (skip after last dot‐row)
+         if (i < ROWS) {
+             printf("   ");
+             for (int j = 0; j <= COLS; j++) {
+                 printf("%c", vedge[i][j] ? '|' : ' ');
+                 if (j < COLS) {
+                     printf("%c", boxOwner[i][j] ? boxOwner[i][j] : ' ');
+                 }
+             }
+             printf("\n");
+         }
+     }
+ 
+     // Score and current player
+     printf("\nScore  A:%d  B:%d   [%c’s turn]\n\n",
+            score[0], score[1], player ? 'B' : 'A');
+ }
  /* ---------- human move ---------- */
  static void humanMove(void)
  {
