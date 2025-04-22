@@ -1,12 +1,6 @@
 
-/*  dots_and_boxes.c  –  4×5 Dots & Boxes with hard AI
- *
- *  Ported from the original JavaScript logic supplied by the user.
- *  Coordinates are entered as four integers:  r1 c1 r2 c2
- *  (row‑col of the first dot, then row‑col of the second dot).
- *  Rows go 0‥4 and columns 0‥5 for dots.
- *
- *  Players: A = human, B = bot.
+/*  
+Hard_Bot.c
  */
 
  #include <stdio.h>
@@ -224,7 +218,6 @@
      if (zz_ > 1) setVedge(x_, y_);
      else          setHedge(x_, y_);
  }
- 
  /* ---------- AI main ---------- */
  static void hardBotMove(void)
  {
