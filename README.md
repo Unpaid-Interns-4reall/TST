@@ -1,75 +1,66 @@
-# Dots and Boxes (4×5)
+# Dots and Boxes (4x5)
 
-A simple two-player Dots and Boxes game implemented in C. This version uses a 4×5 grid of boxes (5×6 dots), and players take turns drawing lines between adjacent dots. Whenever a player completes a box, they score a point and take another turn.
+Console Dots and Boxes written in C. The board has 4 rows by 5 columns of boxes (20 total), which corresponds to a 5x6 grid of dots. Draw edges between adjacent dots to complete boxes. When you complete a box, you score it and take another turn.
 
-## How It Works
+This build supports four modes:
+- 1: Two-player (hotseat)
+- 2: Easy bot (random valid moves)
+- 3: Medium bot (chain-aware heuristic)
+- 4: Hard bot (separate program `Hard_Bot`)
 
-1. **Board Setup**  
-   - There are 5 rows and 6 columns of dots, forming 4 rows of boxes and 5 columns of boxes (total of 20 boxes).
-   - Each box can be claimed by drawing its four surrounding edges.
+## Board & Rules
 
-2. **Gameplay**  
-   - Two players, **Player A** and **Player B**, alternate turns.
-   - On your turn, you pick two adjacent dots (either horizontally or vertically) and draw a line between them.
-   - If you complete a box by drawing its last edge, you immediately take another turn.
-   - The game ends once all 20 boxes are claimed.
+- Dots are addressed by zero-based coordinates: rows `0..4` and columns `0..5`.
+- A move is two adjacent dots either horizontally or vertically: `r1 c1 r2 c2`.
+- Completing a box grants it to the current player and they play again.
+- Game ends when all 20 boxes are owned; highest score wins.
 
-3. **Scoring**  
-   - Each claimed box is worth **1 point**.
-   - Your score is the number of boxes you have claimed.
-   - The player with the most boxes at the end wins; if both have the same number, it’s a tie.
+## Build
 
-## Requirements
+Build both the main game and the hard bot program in the project root.
 
-- A C compiler (e.g., `gcc` or `clang`).
+- Windows (MinGW):
+  - `gcc -O2 -std=c11 main.c -o main.exe`
+  - `gcc -O2 -std=c11 Hard_Bot.c -o Hard_Bot.exe`
 
-## How to Compile
+- Linux/macOS:
+  - `gcc -O2 -std=c11 main.c -o main`
+  - `gcc -O2 -std=c11 Hard_Bot.c -o Hard_Bot`
 
-1. Clone or download this repository.
-2. Open a terminal in the project directory.
-3. Compile the code with:
-   ```bash
-   gcc -o dots_and_boxes main.c
-4. You should now have an executable called dots_and_boxes (on Windows, it might be dots_and_boxes.exe).
+Notes:
+- No pthreads are required; the medium bot runs sequentially.
+- Mode 4 launches the external `Hard_Bot` binary in the same folder (`Hard_Bot.exe` on Windows, `Hard_Bot` on Unix-like systems).
 
-## How to Run
+## Run
 
-Run the compiled executable:
-```bash
-./dots_and_boxes
-```
-## How to Play
+- Windows: `./main.exe`
+- Linux/macOS: `./main`
 
-1. When the program starts, it displays the board and each player's score.
+Select a mode (1–4) when prompted.
 
-2. You’ll be prompted to enter four integers, for example:
-   0 0 0 1
-   These represent two adjacent dots:
-   - `0 0` = row 0, column 0  
-   - `0 1` = row 0, column 1  
-   (which are horizontally adjacent)
+## Input Format
 
-3. Ensure the dots are **next to each other** either horizontally or vertically. If you pick an invalid pair (not adjacent, out of range, or already connected), you’ll be asked to try again.
+On your turn, enter four integers separated by spaces:
 
-4. If your line completes a box, you’ll see:
-   Player A completed a square! And you immediately take another turn.
+`r1 c1 r2 c2`
 
-5. Play continues until all 20 boxes are claimed.
-## Example Turn
+Examples:
+- `0 0 0 1` draws a horizontal edge between `(0,0)` and `(0,1)`.
+- `1 3 2 3` draws a vertical edge between `(1,3)` and `(2,3)`.
 
-```vbnet
-Player A's turn. Enter the row and column of the first dot (e.g., 0 0) and second dot: 0 0 0 1
-This means Player A is drawing a horizontal line between dot(0,0) and dot(0,1).
-If that completes a box, Player A goes again; otherwise, it’s Player B’s turn.
-```
+The two dots must be adjacent and within range; attempting an invalid or already-drawn edge will be rejected and you can enter another move.
+
+## Example Prompt
+
+`Player A's turn. Enter the row and column of the first dot (e.g., 0 0) and second dot: 0 0 0 1`
+
 ## Contributing
 
-If you'd like to improve or extend this project:
-1. Fork this repository.
-2. Make your changes.
-3. Open a Pull Request describing your updates.
+1. Fork the repo and create a feature branch.
+2. Make focused changes with clear commit messages.
+3. Open a Pull Request describing the change and testing.
 
 ## License
 
-This project is licensed under the MIT License.  
-Feel free to use, modify, and distribute it as you see fit.
+MIT License.
+
